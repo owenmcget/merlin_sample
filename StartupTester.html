@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Startup Tester</title>
+  <style>
+    #div2, #div3 {
+      float: left;
+      width: 50%;
+      height: 300px;
+    }
+    #div2 {
+      float: left;
+    }
+    #div3 {
+      float: right;
+    }
+    .loading, .ajax {
+      color: red;
+    }
+  </style>
+  <!-- Load sample extension -->
+  <script src="omExtension.js"></script>
+  <!-- Load jQuery from CDN -->
+  <script
+    src="https://code.jquery.com/jquery-3.2.1.min.js"
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous">
+  </script>
+  <!-- Setup some dynamic page element to test loading detection -->
+  <script>
+    // Simulate a complex page loading
+    $(document).ready(function() {
+      OM.log("In jQuery ready function.");
+      setTimeout(function() {
+        $("#div1").append("<h3>Document ready.</h3>");
+        OM.log("document ready!");
+        showLoadingDivs();
+        makeAjaxCalls();
+      }, 2000);
+    });
+
+    // Add some loading divs
+    function showLoadingDivs() {
+      loadingDiv("l1", 2000);
+      loadingDiv("l2", 4000);
+    }
+
+    function loadingDiv(id, duration) {
+      OM.log("Adding loading div " + id + ".");
+      $("#div2").append(
+        '<h4 id="' + id + '" class="loading">Loading ' + id + "</h4>"
+      );
+      setTimeout(function() {
+        $("#" + id).remove();
+        OM.log("loading div " + id + " removed.");
+      }, duration);
+    }
+
+    // Make some ajax calls that load images
+    function makeAjaxCalls() {
+      ajaxCall("a1", 3000);
+      ajaxCall("a2", 5000);
+    }
+
+    function ajaxCall(id, duration) {
+      OM.log("Making ajax call " + id + ".");
+      $("#div3").append(
+        '<h4 id="' +
+          id +
+          '" class="ajax">Ajax Call  ' +
+          id +
+          " in progress ...</h4>"
+      );
+      $("#div3").append(
+        '<img id="img' + id + '" alt="ajax img" height="100" width="140"><br/>'
+      );
+      setTimeout(function() {
+        $("#" + id).remove();
+        OM.log("ajax call " + id + " complete.");
+        imgAjax("img" + id);
+      }, duration);
+    }
+
+    function imgAjax(id) {
+      var myImage = document.querySelector("#" + id);
+      var myImg = OM.ajax("mg.png", "get", function(blob) {
+        myImage.src = URL.createObjectURL(blob);
+      });
+      // Fetch doesn't seem to use XMLHttpRequest.send
+      //fetch('mg.png').then(function(response) {
+      //  console.log(response);
+      //  return response.blob();
+      //}).then(function(myBlob) {
+      //  var objectURL = URL.createObjectURL(myBlob);
+      //  myImage.src = objectURL;
+      //});
+    }
+
+  </script>
+</head>
+<body>
+  <div id="div1">
+    <h3>Simulate startup delay of 2 seconds.</h3> 
+  </div>
+  <div id="div2">
+    <h3>Simulate loading divs</h3>
+    <h3>One taking 2 seconds, one taking 4 seconds</h3> 
+  </div>
+  <div id="div3">
+    <h3>Simulate ajax calls</h3>
+    <h3>One taking 3 seconds, one taking 5 seconds.</h3> 
+  </div>
+  <div id="log">
+  </div>
+</body>
+</html>
